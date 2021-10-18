@@ -18,7 +18,6 @@ import { registerLocaleData } from '@angular/common';
 registerLocaleData(localeEs);
 registerLocaleData(localeFr);
 
-
 @NgModule({
   declarations: [
     AppComponent

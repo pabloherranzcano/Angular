@@ -25,7 +25,7 @@ import { OrdenarPipe } from './pipes/ordenar.pipe';
     // Pipes
     MayusculasPipe,
     OrdenarPipe,
-    VuelaPipe
+    VuelaPipe,
   ],
   exports: [
     BasicosComponent,
