@@ -12,7 +12,7 @@ const crearUsuario = async(req, res = response) => {
         // Verificar el email
         const usuario = await Usuario.findOne({ email });
 
-        if ( usuario ) {
+        if (usuario) {
             return res.status(400).json({
                 ok: false,
                 msg: 'El usuario ya existe con ese email'
@@ -20,14 +20,14 @@ const crearUsuario = async(req, res = response) => {
         }
 
         // Crear usuario con el modelo
-        const dbUser = new Usuario( req.body );
+        const dbUser = new Usuario(req.body);
 
         // Hashear la contraseña
         const salt = bcrypt.genSaltSync();
-        dbUser.password = bcrypt.hashSync( password, salt );
+        dbUser.password = bcrypt.hashSync(password, salt);
 
         // Generar el JWT
-        const token = await generarJWT( dbUser.id, name );
+        const token = await generarJWT(dbUser.id, name);
 
         // Crear usuario de DB
         await dbUser.save();
@@ -37,12 +37,13 @@ const crearUsuario = async(req, res = response) => {
             ok: true,
             uid: dbUser.id,
             name,
+            email,
             token
         });
 
-    
 
-        
+
+
     } catch (error) {
         console.log(error);
         return res.status(500).json({
@@ -59,10 +60,10 @@ const loginUsuario = async(req, res = response) => {
     const { email, password } = req.body;
 
     try {
-        
+
         const dbUser = await Usuario.findOne({ email });
 
-        if(  !dbUser ) {
+        if (!dbUser) {
             return res.status(400).json({
                 ok: false,
                 msg: 'El correo no existe'
@@ -70,9 +71,9 @@ const loginUsuario = async(req, res = response) => {
         }
 
         // Confirmar si el password hace match
-        const validPassword = bcrypt.compareSync( password, dbUser.password );
+        const validPassword = bcrypt.compareSync(password, dbUser.password);
 
-        if ( !validPassword ) {
+        if (!validPassword) {
             return res.status(400).json({
                 ok: false,
                 msg: 'El password no es válido'
@@ -80,13 +81,14 @@ const loginUsuario = async(req, res = response) => {
         }
 
         // Generar el JWT
-        const token = await generarJWT( dbUser.id, dbUser.name );
+        const token = await generarJWT(dbUser.id, dbUser.name);
 
         // Respuesta del servicio
         return res.json({
             ok: true,
             uid: dbUser.id,
             name: dbUser.name,
+            email: dbUser.email,
             token
         });
 
@@ -103,17 +105,21 @@ const loginUsuario = async(req, res = response) => {
 
 }
 
-const revalidarToken = async(req, res = response ) => {
+const revalidarToken = async(req, res = response) => {
 
-    const { uid, name } = req;
+    const { uid } = req;
+
+    // Leer la BBDD
+    const dbUser = await Usuario.findById(uid);
 
     // Generar el JWT
-    const token = await generarJWT( uid, name );
+    const token = await generarJWT(uid, dbUser.name);
 
     return res.json({
         ok: true,
-        uid, 
-        name,
+        uid,
+        name: dbUser.name,
+        email: dbUser.email,
         token
     });
 
